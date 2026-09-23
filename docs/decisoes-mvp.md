@@ -15,6 +15,14 @@ em produção na Sprint 2, então todos os requisitos Must foram concentrados ne
 - **Imagem de referência:** upload ou link, uma por atendimento, substituível.
 - **Uma conta = um tatuador.** Estúdios com vários profissionais ficam para versão futura.
 
+- **Bucket de imagens público.** As referências ficam em um bucket público com
+  caminhos que incluem o ID do usuário e nomes aleatórios, o que impede listagem
+  e adivinhação. O envio e a exclusão são protegidos por políticas de RLS.
+  Uma versão futura usaria bucket privado com URLs assinadas.
+  
+- **Confirmação de e-mail desativada.** O plano gratuito limita o envio de e-mails
+  e o cadastro precisa ser imediato para avaliação e testes com usuários.
+
 ## Fora do MVP
 - Should: busca/filtro, dashboard semanal, lembretes na plataforma.
 - Could: orçamento em PDF, financeiro avançado, lembretes via WhatsApp.
