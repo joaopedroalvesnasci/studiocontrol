@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist } from 'next/font/google'
+import Shell from '@/components/shell'
 import './globals.css'
 
 const geist = Geist({
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#09090b',
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -22,7 +24,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${geist.variable} antialiased`}>{children}</body>
+      <body className={`${geist.variable} antialiased`}>
+        <Shell>{children}</Shell>
+      </body>
     </html>
   )
 }

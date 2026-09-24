@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import Botao from '@/components/ui/botao'
 
 export default function BotaoSair() {
   const router = useRouter()
@@ -14,11 +15,8 @@ export default function BotaoSair() {
   }
 
   return (
-    <button
-      onClick={sair}
-      className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-    >
-      Sair
-    </button>
+    <Botao variante="secundario" onClick={sair} className="w-full">
+      Sair da conta
+    </Botao>
   )
 }
