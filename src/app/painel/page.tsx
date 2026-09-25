@@ -1,28 +1,23 @@
-import { createClient } from '@/lib/supabase/server'
-import BotaoSair from './botao-sair'
+import CabecalhoPagina from '@/components/cabecalho-pagina'
+import EstadoVazio from '@/components/ui/estado-vazio'
 
 /**
- * Versão provisória do painel, usada apenas para validar o login.
- * A tela real (próximas sessões) é construída na Etapa 8.
+ * Versao provisoria. A agenda real (proximas sessoes) e construida
+ * na Etapa 8, quando os atendimentos ja existirem.
  */
-export default async function PainelPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const nome = user?.user_metadata?.nome ?? user?.email
-
+export default function PainelPage() {
   return (
-    <main className="px-6 py-12">
-      <div className="mx-auto w-full max-w-md">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Painel</h1>
-        <p className="mt-2 text-zinc-400">Logado como {nome}</p>
+    <main className="mx-auto w-full max-w-md px-6 py-10">
+      <CabecalhoPagina
+        titulo="Agenda"
+        descricao="Suas próximas sessões aparecem aqui."
+      />
 
-        <div className="mt-8">
-          <BotaoSair />
-        </div>
-      </div>
+      <EstadoVazio
+        titulo="Nenhuma sessão agendada"
+        descricao="Cadastre um cliente e crie o primeiro atendimento para ver a agenda."
+        acao={{ href: '/clientes', rotulo: 'Ver clientes' }}
+      />
     </main>
   )
 }
