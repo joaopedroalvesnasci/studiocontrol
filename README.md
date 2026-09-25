@@ -4,7 +4,7 @@
 
 **Equipe:** João Pedro Nascimento Alves (RA 214751) e Vinicius Leandro Dos Santos (RA 217315)
 
-**Produção:** _em breve_
+**Produção:** https://SUA-URL.vercel.app
 
 ## Stack
 - Next.js (React + TypeScript) + Tailwind CSS
