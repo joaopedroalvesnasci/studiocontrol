@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import CabecalhoPagina from '@/components/cabecalho-pagina'
 import EstadoVazio from '@/components/ui/estado-vazio'
-import { moeda, dataHora } from '@/lib/formato'
+import { moeda, dataHora, ehHoje } from '@/lib/formato'
 
 export default async function PainelPage() {
   const supabase = await createClient()
@@ -13,8 +13,6 @@ export default async function PainelPage() {
     .eq('status', 'agendada')
     .not('data_sessao', 'is', null)
     .order('data_sessao', { ascending: true })
-
-  const hoje = new Date().toDateString()
 
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6">
@@ -34,23 +32,21 @@ export default async function PainelPage() {
         <ul className="space-y-4">
           {sessoes.map((sessao) => {
             const cliente = sessao.clientes as unknown as { nome: string } | null
-            const ehHoje =
-              sessao.data_sessao &&
-              new Date(sessao.data_sessao).toDateString() === hoje
+            const hoje = ehHoje(sessao.data_sessao)
 
             return (
               <li key={sessao.id}>
                 <Link
                   href={`/atendimentos/${sessao.id}`}
                   className={`sombra-cartao block rounded-2xl border bg-superficie px-6 py-5 transition hover:border-destaque ${
-                    ehHoje ? 'border-destaque' : 'border-marca'
+                    hoje ? 'border-destaque' : 'border-marca'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="truncate text-2xl text-white">
                       {cliente?.nome ?? 'Cliente removido'}
                     </p>
-                    {ehHoje && (
+                    {hoje && (
                       <span className="shrink-0 rounded-md bg-destaque px-3 py-1 text-xs font-bold text-fundo">
                         Hoje
                       </span>
