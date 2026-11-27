@@ -63,3 +63,23 @@ export type StatusSessao = keyof typeof STATUS
 
 /** Classes base da etiqueta de status. */
 export const ETIQUETA = 'shrink-0 rounded-md border px-3 py-1 text-xs tracking-wide'
+
+
+/** Formas de pagamento aceitas pelo banco (ver supabase/etapa1-pagamentos.sql). */
+export const FORMAS = {
+  pix: 'Pix',
+  dinheiro: 'Dinheiro',
+  debito: 'Débito',
+  credito: 'Crédito',
+  nao_informada: 'Não informada',
+} as const
+
+export type FormaPagamento = keyof typeof FORMAS
+
+/** Formas que aparecem como botão ao confirmar (sem "Não informada"). */
+export const FORMAS_ESCOLHA: FormaPagamento[] = ['pix', 'dinheiro', 'debito', 'credito']
+
+/** Nome legível de uma forma salva no banco. */
+export function nomeForma(forma: string | null | undefined) {
+  return FORMAS[(forma ?? 'nao_informada') as FormaPagamento] ?? 'Não informada'
+}

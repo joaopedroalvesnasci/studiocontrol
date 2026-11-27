@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { moeda, dataHora, STATUS, ETIQUETA, type StatusSessao } from '@/lib/formato'
+import { dataHora, STATUS, ETIQUETA, type StatusSessao } from '@/lib/formato'
 import MudarStatus from './mudar-status'
+import BlocoPagamento from './bloco-pagamento'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -49,24 +50,17 @@ export default async function AtendimentoPage({ params }: Props) {
         <p className="mt-1 text-zinc-400">{dataHora(atendimento.data_sessao)}</p>
       </header>
 
-      {/* O valor a cobrar é o que o tatuador precisa ver primeiro */}
-      <section className="sombra-cartao rounded-2xl border border-destaque bg-superficie px-6 py-5">
-        <p className="text-sm text-zinc-400">A cobrar nesta sessão</p>
-        <p className="mt-1 text-5xl font-bold tracking-tight text-destaque">
-          {moeda(atendimento.valor_restante)}
-        </p>
-
-        <dl className="mt-4 flex gap-8 border-t border-marca/60 pt-4 text-sm">
-          <div>
-            <dt className="text-zinc-400">Orçamento</dt>
-            <dd className="mt-0.5 font-semibold text-white">{moeda(atendimento.valor_total)}</dd>
-          </div>
-          <div>
-            <dt className="text-zinc-400">Sinal pago</dt>
-            <dd className="mt-0.5 font-semibold text-white">{moeda(atendimento.valor_sinal)}</dd>
-          </div>
-        </dl>
-      </section>
+            {/* O valor a cobrar é o que o tatuador precisa ver primeiro */}
+      <BlocoPagamento
+        id={atendimento.id}
+        valorTotal={Number(atendimento.valor_total)}
+        valorSinal={Number(atendimento.valor_sinal)}
+        valorRestante={Number(atendimento.valor_restante)}
+        sinalRecebidoEm={atendimento.sinal_recebido_em}
+        sinalForma={atendimento.sinal_forma}
+        pagamentoRecebidoEm={atendimento.pagamento_recebido_em}
+        pagamentoForma={atendimento.pagamento_forma}
+      />
 
       {atendimento.imagem_url && (
         <section className="mt-6">
