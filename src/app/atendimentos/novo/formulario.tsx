@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { enviarReferencia, TAMANHO_MAXIMO } from '@/lib/upload'
-import { moeda } from '@/lib/formato'
+import { moeda, FORMAS, FORMAS_ESCOLHA, type FormaPagamento } from '@/lib/formato'
 import { Campo, CampoTexto } from '@/components/ui/campo'
 import Selecao from '@/components/ui/selecao'
 import Botao from '@/components/ui/botao'
@@ -26,6 +26,8 @@ export default function FormularioAtendimento({
   const [descricao, setDescricao] = useState('')
   const [valorTotal, setValorTotal] = useState('')
   const [valorSinal, setValorSinal] = useState('')
+  const [sinalRecebido, setSinalRecebido] = useState(true)
+  const [formaSinal, setFormaSinal] = useState<FormaPagamento>('pix')
   const [dataSessao, setDataSessao] = useState('')
 
   const [modoImagem, setModoImagem] = useState<'arquivo' | 'link'>('arquivo')
@@ -38,7 +40,9 @@ export default function FormularioAtendimento({
 
   const total = Number(valorTotal) || 0
   const sinal = Number(valorSinal) || 0
-  const restante = total - sinal
+  // Só desconta o sinal do "a cobrar" se ele já tiver sido recebido
+  const restante = total - (sinalRecebido ? sinal : 0)
+  const registrarSinal = sinal > 0 && sinalRecebido
 
   function escolherArquivo(evento: React.ChangeEvent<HTMLInputElement>) {
     const escolhido = evento.target.files?.[0]
@@ -80,7 +84,7 @@ export default function FormularioAtendimento({
       let imagemUrl: string | null = null
 
       if (modoImagem === 'arquivo' && arquivo) {
-         imagemUrl = await enviarReferencia(arquivo, user.id)
+        imagemUrl = await enviarReferencia(arquivo, user.id)
       } else if (modoImagem === 'link' && linkImagem.trim()) {
         imagemUrl = linkImagem.trim()
       }
@@ -94,6 +98,8 @@ export default function FormularioAtendimento({
           imagem_url: imagemUrl,
           valor_total: total,
           valor_sinal: sinal,
+          sinal_recebido_em: registrarSinal ? new Date().toISOString() : null,
+          sinal_forma: registrarSinal ? formaSinal : null,
           data_sessao: dataSessao ? new Date(dataSessao).toISOString() : null,
           status: 'agendada',
         })
@@ -208,7 +214,7 @@ export default function FormularioAtendimento({
         />
         <Campo
           id="sinal"
-          rotulo="Sinal pago"
+          rotulo="Sinal"
           type="number"
           inputMode="decimal"
           step="0.01"
@@ -219,6 +225,39 @@ export default function FormularioAtendimento({
           className="px-4"
         />
       </div>
+
+      {sinal > 0 && (
+        <div className="space-y-3 rounded-2xl border border-marca px-5 py-4">
+          <label className="flex cursor-pointer items-center gap-3 text-white">
+            <input
+              type="checkbox"
+              checked={sinalRecebido}
+              onChange={(e) => setSinalRecebido(e.target.checked)}
+              className="h-5 w-5 accent-[#3c7962]"
+            />
+            Já recebi o sinal
+          </label>
+
+          {sinalRecebido && (
+            <div className="grid grid-cols-4 gap-2">
+              {FORMAS_ESCOLHA.map((forma) => (
+                <button
+                  key={forma}
+                  type="button"
+                  onClick={() => setFormaSinal(forma)}
+                  className={`rounded-full border px-2 py-2 text-xs transition ${
+                    formaSinal === forma
+                      ? 'border-destaque bg-marca/30 text-destaque'
+                      : 'border-marca text-zinc-300 hover:text-white'
+                  }`}
+                >
+                  {FORMAS[forma]}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {total > 0 && (
         <div className="sombra-cartao flex items-center justify-between rounded-2xl border border-marca bg-superficie px-6 py-4">
