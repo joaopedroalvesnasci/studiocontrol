@@ -94,7 +94,12 @@ export default async function AtendimentoPage({ params }: Props) {
       </section>
 
       <div className="mt-8">
-        <MudarStatus id={atendimento.id} statusAtual={atendimento.status} />
+        <MudarStatus
+          id={atendimento.id}
+          statusAtual={atendimento.status}
+          valorAReceber={Number(atendimento.valor_restante)}
+          sinalPendente={Number(atendimento.valor_sinal) > 0 && !atendimento.sinal_recebido_em}
+        />
       </div>
     </main>
   )
