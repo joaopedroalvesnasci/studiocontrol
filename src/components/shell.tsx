@@ -1,22 +1,24 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import Topo from './topo'
 import NavInferior from './nav-inferior'
 
-/** Telas que aparecem antes do login e nao levam a barra de navegacao. */
-const SEM_NAVEGACAO = ['/login', '/cadastro']
+/** Telas antes do login: têm topo próprio, maior, e não levam a navegação. */
+const TELAS_DE_ACESSO = ['/login', '/cadastro']
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const caminho = usePathname()
-  const escondeNav = SEM_NAVEGACAO.some((rota) => caminho.startsWith(rota))
+  const telaDeAcesso = TELAS_DE_ACESSO.some((rota) => caminho.startsWith(rota))
 
-  if (escondeNav) {
+  if (telaDeAcesso) {
     return <>{children}</>
   }
 
   return (
     <>
-      <div className="pb-20">{children}</div>
+      <Topo />
+      <div className="pb-28">{children}</div>
       <NavInferior />
     </>
   )

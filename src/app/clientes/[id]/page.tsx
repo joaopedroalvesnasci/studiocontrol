@@ -3,7 +3,13 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CabecalhoPagina from '@/components/cabecalho-pagina'
 import EstadoVazio from '@/components/ui/estado-vazio'
-import { moeda, data as formataData, STATUS, type StatusSessao } from '@/lib/formato'
+import {
+  moeda,
+  data as formataData,
+  STATUS,
+  ETIQUETA,
+  type StatusSessao,
+} from '@/lib/formato'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -28,12 +34,12 @@ export default async function ClientePage({ params }: Props) {
   const telefoneLimpo = cliente.telefone?.replace(/\D/g, '')
 
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-10">
+    <main className="mx-auto w-full max-w-md px-6 pt-6">
       <Link
         href="/clientes"
-        className="text-sm text-zinc-500 transition hover:text-zinc-300"
+        className="text-sm text-zinc-400 transition hover:text-white"
       >
-        Voltar para clientes
+        ← Voltar para clientes
       </Link>
 
       <div className="mt-4">
@@ -44,15 +50,15 @@ export default async function ClientePage({ params }: Props) {
       </div>
 
       {(cliente.telefone || cliente.instagram || cliente.observacoes) && (
-        <section className="mb-8 space-y-2 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-sm">
+        <section className="sombra-cartao mb-10 space-y-4 rounded-2xl border border-marca bg-superficie px-6 py-5">
           {cliente.telefone && (
-            <p>
-              <span className="text-zinc-500">Telefone: </span>
+            <p className="text-white">
+              Telefone:{' '}
               <a
                 href={`https://wa.me/55${telefoneLimpo}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-emerald-400 hover:underline"
+                className="text-destaque hover:underline"
               >
                 {cliente.telefone}
               </a>
@@ -60,13 +66,13 @@ export default async function ClientePage({ params }: Props) {
           )}
 
           {cliente.instagram && (
-            <p>
-              <span className="text-zinc-500">Instagram: </span>
+            <p className="text-white">
+              Instagram:{' '}
               <a
                 href={`https://instagram.com/${cliente.instagram}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-emerald-400 hover:underline"
+                className="text-destaque hover:underline"
               >
                 @{cliente.instagram}
               </a>
@@ -74,18 +80,18 @@ export default async function ClientePage({ params }: Props) {
           )}
 
           {cliente.observacoes && (
-            <p className="whitespace-pre-wrap text-zinc-300">
+            <p className="whitespace-pre-wrap text-sm text-zinc-300">
               {cliente.observacoes}
             </p>
           )}
         </section>
       )}
 
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-semibold text-white">Atendimentos</h2>
+      <div className="mb-4 flex items-center justify-between px-2">
+        <h2 className="text-xl text-white">Atendimentos</h2>
         <Link
           href={`/atendimentos/novo?cliente=${id}`}
-          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
+          className="rounded-lg bg-marca px-4 py-2 text-sm tracking-wide text-white transition hover:bg-marca-forte"
         >
           Novo
         </Link>
@@ -101,7 +107,7 @@ export default async function ClientePage({ params }: Props) {
           }}
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-4">
           {atendimentos.map((a) => {
             const status = STATUS[a.status as StatusSessao]
 
@@ -109,29 +115,20 @@ export default async function ClientePage({ params }: Props) {
               <li key={a.id}>
                 <Link
                   href={`/atendimentos/${a.id}`}
-                  className="block rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-4 transition hover:border-zinc-700"
+                  className="sombra-cartao block rounded-2xl border border-marca bg-superficie px-6 py-5 transition hover:border-destaque"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="line-clamp-2 text-sm text-zinc-200">
-                      {a.descricao}
-                    </p>
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.cor}`}
-                    >
-                      {status.rotulo}
-                    </span>
+                    <p className="line-clamp-2 text-xl text-destaque">{a.descricao}</p>
+                    <span className={`${ETIQUETA} ${status.cor}`}>{status.rotulo}</span>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between text-sm">
-                    <span className="text-zinc-500">
-                      {formataData(a.data_sessao)}
-                    </span>
-                    <span className="text-zinc-400">
+                  <div className="mt-2 flex items-end justify-between gap-3">
+                    <span className="text-zinc-400">{formataData(a.data_sessao)}</span>
+                    <span className="text-right text-destaque">
                       {moeda(a.valor_total)}
                       {Number(a.valor_restante) > 0 && (
-                        <span className="text-emerald-400">
-                          {' '}
-                          · falta {moeda(a.valor_restante)}
+                        <span className="block text-xs text-zinc-400">
+                          falta {moeda(a.valor_restante)}
                         </span>
                       )}
                     </span>

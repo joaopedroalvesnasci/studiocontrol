@@ -14,7 +14,7 @@ export default async function ClientesPage() {
   const vazio = !clientes || clientes.length === 0
 
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-10">
+    <main className="mx-auto w-full max-w-md px-6 pt-6">
       <CabecalhoPagina
         titulo="Clientes"
         descricao="Todo mundo que já passou pela sua cadeira."
@@ -28,7 +28,7 @@ export default async function ClientesPage() {
           acao={{ href: '/clientes/novo', rotulo: 'Cadastrar cliente' }}
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-5">
           {clientes.map((cliente) => {
             const total =
               (cliente.atendimentos as unknown as { count: number }[])?.[0]
@@ -38,20 +38,16 @@ export default async function ClientesPage() {
               <li key={cliente.id}>
                 <Link
                   href={`/clientes/${cliente.id}`}
-                  className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-4 transition hover:border-zinc-700"
+                  className="sombra-cartao flex items-center justify-between gap-3 rounded-2xl border border-marca bg-superficie px-6 py-6 transition hover:border-destaque"
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-white">
-                      {cliente.nome}
-                    </p>
+                    <p className="truncate text-2xl text-white">{cliente.nome}</p>
                     {cliente.telefone && (
-                      <p className="mt-0.5 truncate text-sm text-zinc-500">
-                        {cliente.telefone}
-                      </p>
+                      <p className="mt-1 truncate text-zinc-400">{cliente.telefone}</p>
                     )}
                   </div>
 
-                  <span className="ml-3 shrink-0 text-sm text-zinc-500">
+                  <span className="shrink-0 font-bold text-destaque">
                     {total === 1 ? '1 atendimento' : `${total} atendimentos`}
                   </span>
                 </Link>

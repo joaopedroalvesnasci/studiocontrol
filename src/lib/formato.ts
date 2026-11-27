@@ -1,4 +1,4 @@
-/** Formata um numero como moeda brasileira: 1234.5 vira "R$ 1.234,50". */
+/** Formata um número como moeda brasileira: 1234.5 vira "R$ 1.234,50". */
 export function moeda(valor: number | string | null | undefined) {
   const numero = Number(valor ?? 0)
   return numero.toLocaleString('pt-BR', {
@@ -27,11 +27,14 @@ export function data(valor: string | null | undefined) {
   return new Date(valor).toLocaleDateString('pt-BR')
 }
 
-/** Rotulo e cor de cada status de sessao. */
+/** Rótulo e estilo de cada status de sessão (etiqueta com contorno, como no protótipo). */
 export const STATUS = {
-  agendada: { rotulo: 'Agendada', cor: 'bg-emerald-950 text-emerald-300' },
-  concluida: { rotulo: 'Concluída', cor: 'bg-zinc-800 text-zinc-300' },
-  cancelada: { rotulo: 'Cancelada', cor: 'bg-red-950 text-red-300' },
+  agendada: { rotulo: 'Agendada', cor: 'border-destaque text-destaque' },
+  concluida: { rotulo: 'Concluída', cor: 'border-zinc-400 text-zinc-200' },
+  cancelada: { rotulo: 'Cancelada', cor: 'border-red-400 text-red-300' },
 } as const
 
 export type StatusSessao = keyof typeof STATUS
+
+/** Classes base da etiqueta de status. */
+export const ETIQUETA = 'shrink-0 rounded-md border px-3 py-1 text-xs tracking-wide'

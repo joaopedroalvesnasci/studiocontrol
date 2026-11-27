@@ -4,6 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import Topo from '@/components/topo'
+import { Campo } from '@/components/ui/campo'
+import CampoSenha from '@/components/ui/campo-senha'
+import Botao from '@/components/ui/botao'
 
 export default function CadastroPage() {
   const router = useRouter()
@@ -50,86 +54,62 @@ export default function CadastroPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col justify-center px-6 py-12">
-      <div className="mx-auto w-full max-w-sm">
-        <h1 className="text-2xl font-bold tracking-tight text-white">
+    <div className="min-h-dvh">
+      <Topo grande />
+
+      <main className="mx-auto w-full max-w-md px-6 pt-6 pb-12">
+        <h1 className="text-center text-5xl font-bold tracking-tight text-white">
           Criar conta
         </h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Organize clientes, orçamentos e sessões em um só lugar.
-        </p>
 
-        <form onSubmit={handleCadastro} className="mt-8 space-y-4">
-          <div>
-            <label htmlFor="nome" className="mb-1.5 block text-sm text-zinc-300">
-              Nome
-            </label>
-            <input
-              id="nome"
-              type="text"
-              autoComplete="name"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Seu nome"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-600 outline-none transition focus:border-emerald-500"
-            />
-          </div>
+        <form onSubmit={handleCadastro} className="mt-10 space-y-6">
+          <Campo
+            id="nome"
+            rotulo="Nome completo"
+            autoComplete="name"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+          />
 
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm text-zinc-300">
-              E-mail
-            </label>
-            <input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="voce@email.com"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-600 outline-none transition focus:border-emerald-500"
-            />
-          </div>
+          <Campo
+            id="email"
+            rotulo="E-mail"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-          <div>
-            <label htmlFor="senha" className="mb-1.5 block text-sm text-zinc-300">
-              Senha
-            </label>
-            <input
-              id="senha"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              placeholder="Mínimo de 6 caracteres"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-600 outline-none transition focus:border-emerald-500"
-            />
-          </div>
+          <CampoSenha
+            id="senha"
+            rotulo="Senha"
+            autoComplete="new-password"
+            required
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            placeholder="Mínimo de 6 caracteres"
+          />
 
           {erro && (
-            <p className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-300">
+            <p className="rounded-2xl border border-red-900 bg-red-950/50 px-5 py-3 text-sm text-red-300">
               {erro}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={carregando}
-            className="w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:opacity-50"
-          >
+          <Botao type="submit" disabled={carregando} className="w-full">
             {carregando ? 'Criando conta...' : 'Criar conta'}
-          </button>
+          </Botao>
 
-          <p className="text-center text-sm text-zinc-400">
-            Já tem conta?{' '}
-            <Link href="/login" className="text-emerald-400 hover:underline">
-              Entrar
+          <p className="text-center text-sm text-white">
+            Já tem uma conta?{' '}
+            <Link href="/login" className="font-bold text-destaque underline">
+              entrar
             </Link>
           </p>
         </form>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }

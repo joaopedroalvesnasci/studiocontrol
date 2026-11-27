@@ -18,7 +18,7 @@ export default async function EditarClientePage({ params }: Props) {
   if (!cliente) notFound()
 
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-10">
+    <main className="mx-auto w-full max-w-md px-6 pt-6">
       <CabecalhoPagina titulo="Editar cliente" />
       <FormularioCliente cliente={cliente} />
     </main>

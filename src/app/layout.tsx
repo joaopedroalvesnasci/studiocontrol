@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import Shell from '@/components/shell'
 import './globals.css'
 
-const geist = Geist({
-  variable: '--font-geist-sans',
+const poppins = Poppins({
+  variable: '--font-poppins',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#09090b',
+  themeColor: '#ffffff',
   viewportFit: 'cover',
 }
 
@@ -24,7 +25,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${geist.variable} antialiased`}>
+      <body className={`${poppins.variable} antialiased`}>
         <Shell>{children}</Shell>
       </body>
     </html>
