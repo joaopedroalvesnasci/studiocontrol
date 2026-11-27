@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { enviarReferencia } from '@/lib/upload'
+import { enviarReferencia, TAMANHO_MAXIMO } from '@/lib/upload'
 import { moeda } from '@/lib/formato'
 import { Campo, CampoTexto } from '@/components/ui/campo'
 import Selecao from '@/components/ui/selecao'
@@ -44,6 +44,16 @@ export default function FormularioAtendimento({
     const escolhido = evento.target.files?.[0]
     if (!escolhido) return
 
+    if (!escolhido.type.startsWith('image/')) {
+      setErro('O arquivo precisa ser uma imagem.')
+      return
+    }
+    if (escolhido.size > TAMANHO_MAXIMO) {
+      setErro('A imagem precisa ter no máximo 5 MB.')
+      return
+    }
+
+    setErro('')
     setArquivo(escolhido)
     setPrevia(URL.createObjectURL(escolhido))
   }
@@ -70,7 +80,7 @@ export default function FormularioAtendimento({
       let imagemUrl: string | null = null
 
       if (modoImagem === 'arquivo' && arquivo) {
-        imagemUrl = await enviarReferencia(supabase, arquivo, user.id)
+         imagemUrl = await enviarReferencia(arquivo, user.id)
       } else if (modoImagem === 'link' && linkImagem.trim()) {
         imagemUrl = linkImagem.trim()
       }
