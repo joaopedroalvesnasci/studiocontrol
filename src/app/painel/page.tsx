@@ -9,7 +9,7 @@ export default async function PainelPage() {
 
   const { data: sessoes } = await supabase
     .from('atendimentos')
-    .select('id, descricao, valor_restante, data_sessao, clientes(nome)')
+    .select('id, descricao, valor_sinal, valor_restante, sinal_recebido_em, pagamento_recebido_em, data_sessao, clientes(nome)')
     .eq('status', 'agendada')
     .not('data_sessao', 'is', null)
     .order('data_sessao', { ascending: true })
@@ -33,6 +33,8 @@ export default async function PainelPage() {
           {sessoes.map((sessao) => {
             const cliente = sessao.clientes as unknown as { nome: string } | null
             const hoje = ehHoje(sessao.data_sessao)
+            const sinalPendente = Number(sessao.valor_sinal) > 0 && !sessao.sinal_recebido_em
+            const pago = Boolean(sessao.pagamento_recebido_em)
 
             return (
               <li key={sessao.id}>
@@ -46,11 +48,18 @@ export default async function PainelPage() {
                     <p className="truncate text-2xl text-white">
                       {cliente?.nome ?? 'Cliente removido'}
                     </p>
-                    {hoje && (
-                      <span className="shrink-0 rounded-md bg-destaque px-3 py-1 text-xs font-bold text-fundo">
-                        Hoje
-                      </span>
-                    )}
+                    <div className="flex shrink-0 gap-2">
+                      {sinalPendente && (
+                        <span className="rounded-md border border-[#f0997b] px-2.5 py-1 text-xs text-[#f0997b]">
+                          Sinal pendente
+                        </span>
+                      )}
+                      {hoje && (
+                        <span className="rounded-md bg-destaque px-3 py-1 text-xs font-bold text-fundo">
+                          Hoje
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <p className="mt-1 truncate text-zinc-400">{sessao.descricao}</p>
@@ -60,7 +69,7 @@ export default async function PainelPage() {
                       {dataHora(sessao.data_sessao)}
                     </span>
                     <span className="text-xl font-bold text-destaque">
-                      {moeda(sessao.valor_restante)}
+                      {pago ? 'Pago' : moeda(sessao.valor_restante)}
                     </span>
                   </div>
                 </Link>
