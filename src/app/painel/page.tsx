@@ -17,10 +17,10 @@ export default async function PainelPage() {
   const hoje = new Date().toDateString()
 
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-10">
+    <main className="mx-auto w-full max-w-md px-6 pt-6">
       <CabecalhoPagina
         titulo="Agenda"
-        descricao="Suas próximas sessões, da mais próxima para a mais distante."
+        descricao="Suas próximas sessões, da mais próxima para a mais distante"
         acao={{ href: '/atendimentos/novo', rotulo: 'Novo' }}
       />
 
@@ -31,7 +31,7 @@ export default async function PainelPage() {
           acao={{ href: '/clientes', rotulo: 'Ver clientes' }}
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-4">
           {sessoes.map((sessao) => {
             const cliente = sessao.clientes as unknown as { nome: string } | null
             const ehHoje =
@@ -42,34 +42,28 @@ export default async function PainelPage() {
               <li key={sessao.id}>
                 <Link
                   href={`/atendimentos/${sessao.id}`}
-                  className={`block rounded-xl border px-4 py-4 transition ${
-                    ehHoje
-                      ? 'border-emerald-700 bg-emerald-950/20'
-                      : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                  className={`sombra-cartao block rounded-2xl border bg-superficie px-6 py-5 transition hover:border-destaque ${
+                    ehHoje ? 'border-destaque' : 'border-marca'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-white">
-                        {cliente?.nome ?? 'Cliente removido'}
-                      </p>
-                      <p className="mt-0.5 line-clamp-1 text-sm text-zinc-500">
-                        {sessao.descricao}
-                      </p>
-                    </div>
-
+                    <p className="truncate text-2xl text-white">
+                      {cliente?.nome ?? 'Cliente removido'}
+                    </p>
                     {ehHoje && (
-                      <span className="shrink-0 rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                      <span className="shrink-0 rounded-md bg-destaque px-3 py-1 text-xs font-bold text-fundo">
                         Hoje
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between text-sm">
+                  <p className="mt-1 truncate text-zinc-400">{sessao.descricao}</p>
+
+                  <div className="mt-2 flex items-center justify-between">
                     <span className="text-zinc-400">
                       {dataHora(sessao.data_sessao)}
                     </span>
-                    <span className="font-semibold text-emerald-400">
+                    <span className="text-xl font-bold text-destaque">
                       {moeda(sessao.valor_restante)}
                     </span>
                   </div>

@@ -3,10 +3,8 @@ type Props = {
 } & React.ButtonHTMLAttributes<HTMLButtonElement>
 
 const ESTILOS = {
-  principal:
-    'bg-emerald-600 text-white hover:bg-emerald-500 focus-visible:outline-emerald-400',
-  secundario:
-    'border border-zinc-700 text-zinc-300 hover:bg-zinc-800 focus-visible:outline-zinc-500',
+  principal: 'bg-marca text-white hover:bg-marca-forte',
+  secundario: 'border border-marca text-white hover:bg-white/5',
 }
 
 export default function Botao({
@@ -17,7 +15,7 @@ export default function Botao({
   return (
     <button
       {...props}
-      className={`rounded-lg px-4 py-3 font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 ${ESTILOS[variante]} ${className}`}
+      className={`rounded-full px-6 py-4 text-lg font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-destaque disabled:opacity-50 ${ESTILOS[variante]} ${className}`}
     />
   )
 }

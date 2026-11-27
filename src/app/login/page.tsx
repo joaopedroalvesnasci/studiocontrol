@@ -4,6 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import Topo from '@/components/topo'
+import { Campo } from '@/components/ui/campo'
+import CampoSenha from '@/components/ui/campo-senha'
+import Botao from '@/components/ui/botao'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -34,71 +38,54 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col justify-center px-6 py-12">
-      <div className="mx-auto w-full max-w-sm">
-        <h1 className="text-2xl font-bold tracking-tight text-white">
-          StudioControl
-        </h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Entre para acessar seu painel.
-        </p>
+    <div className="min-h-dvh">
+      <Topo grande />
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-4">
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm text-zinc-300">
-              E-mail
-            </label>
-            <input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="voce@email.com"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-600 outline-none transition focus:border-emerald-500"
-            />
-          </div>
+      <main className="mx-auto w-full max-w-md px-6 pt-6 pb-12">
+        <div className="text-center">
+          <h1 className="text-5xl font-bold tracking-tight text-white">LOGIN</h1>
+          <p className="mt-2 text-xl text-white">faça o login para continuar</p>
+        </div>
 
-          <div>
-            <label htmlFor="senha" className="mb-1.5 block text-sm text-zinc-300">
-              Senha
-            </label>
-            <input
-              id="senha"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              placeholder="Sua senha"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-600 outline-none transition focus:border-emerald-500"
-            />
-          </div>
+        <form onSubmit={handleLogin} className="mt-10 space-y-6">
+          <Campo
+            id="email"
+            rotulo="E-mail"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <CampoSenha
+            id="senha"
+            rotulo="Senha"
+            autoComplete="current-password"
+            required
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+          />
 
           {erro && (
-            <p className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-300">
+            <p className="rounded-2xl border border-red-900 bg-red-950/50 px-5 py-3 text-sm text-red-300">
               {erro}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={carregando}
-            className="w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:opacity-50"
-          >
-            {carregando ? 'Entrando...' : 'Entrar'}
-          </button>
+          <Botao type="submit" disabled={carregando} className="w-full">
+            {carregando ? 'Entrando...' : 'Log In'}
+          </Botao>
 
-          <p className="text-center text-sm text-zinc-400">
+          <p className="text-center text-sm text-white">
             Não tem conta?{' '}
-            <Link href="/cadastro" className="text-emerald-400 hover:underline">
-              Criar conta
+            <Link href="/cadastro" className="font-bold text-destaque underline">
+              Crie uma aqui
             </Link>
           </p>
         </form>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }

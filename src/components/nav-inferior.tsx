@@ -8,10 +8,7 @@ const ITENS = [
     href: '/painel',
     rotulo: 'Agenda',
     icone: (
-      <>
-        <rect x="3" y="5" width="18" height="16" rx="2" />
-        <path d="M8 3v4M16 3v4M3 11h18" />
-      </>
+      <path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm-2 7h14v10H5V9Zm2 2v2h2v-2H7Zm4 0v2h2v-2h-2Zm4 0v2h2v-2h-2Zm-8 4v2h2v-2H7Zm4 0v2h2v-2h-2Zm4 0v2h2v-2h-2Z" />
     ),
   },
   {
@@ -20,8 +17,9 @@ const ITENS = [
     icone: (
       <>
         <circle cx="9" cy="8" r="4" />
-        <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-        <path d="M16 4.5a4 4 0 0 1 0 7M18 20c0-2.4-.9-4.5-2.3-6" />
+        <path d="M1 20c0-3.9 3.6-7 8-7s8 3.1 8 7v1H1v-1Z" />
+        <circle cx="17" cy="7" r="3" />
+        <path d="M18.6 12.3c2.6.6 4.4 2.8 4.4 5.3V19h-4.2c-.3-2.6-1.6-4.9-3.6-6.4.9-.3 2.1-.4 3.4-.3Z" />
       </>
     ),
   },
@@ -30,8 +28,8 @@ const ITENS = [
     rotulo: 'Perfil',
     icone: (
       <>
-        <circle cx="12" cy="8" r="4" />
-        <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
+        <circle cx="12" cy="7.5" r="4.5" />
+        <path d="M3 21c0-4.4 4-8 9-8s9 3.6 9 8v1H3v-1Z" />
       </>
     ),
   },
@@ -43,7 +41,7 @@ export default function NavInferior() {
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-zinc-800 bg-zinc-950/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-apagado/70 bg-fundo"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <ul className="mx-auto flex max-w-md">
@@ -55,19 +53,15 @@ export default function NavInferior() {
               <Link
                 href={item.href}
                 aria-current={ativo ? 'page' : undefined}
-                className={`flex flex-col items-center gap-1 py-2.5 text-xs transition ${
-                  ativo ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
+                className={`flex flex-col items-center gap-1 py-3 text-xs transition ${
+                  ativo ? 'text-destaque' : 'text-apagado hover:text-zinc-300'
                 }`}
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="28"
+                  height="28"
                   viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  fill="currentColor"
                   aria-hidden="true"
                 >
                   {item.icone}
