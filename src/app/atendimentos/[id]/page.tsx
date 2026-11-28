@@ -37,6 +37,9 @@ export default async function AtendimentoPage({ params }: Props) {
       statusAtual={atendimento.status}
       valorAReceber={Number(atendimento.valor_restante)}
       sinalPendente={Number(atendimento.valor_sinal) > 0 && !atendimento.sinal_recebido_em}
+      dataSessao={atendimento.data_sessao}
+      duracaoMinutos={Number(atendimento.duracao_minutos)}
+      reagendamentos={Number(atendimento.reagendamentos ?? 0)}
     />
   )
 
@@ -61,13 +64,19 @@ export default async function AtendimentoPage({ params }: Props) {
           <span className={`${ETIQUETA} mt-2 ${status.cor}`}>{status.rotulo}</span>
         </div>
         <p className="mt-1 text-zinc-400">{periodo(atendimento.data_sessao, atendimento.duracao_minutos)}</p>
+        {Number(atendimento.reagendamentos) > 0 && (
+          <p className="mt-1 text-sm text-[#f0997b]">
+            Remarcada {atendimento.reagendamentos} {Number(atendimento.reagendamentos) === 1 ? 'vez' : 'vezes'}
+          </p>
+        )}
       </header>
 
       {atrasada && (
         <section className="mb-6 rounded-2xl border border-[#f0997b] bg-[#f0997b]/10 px-6 py-5">
           <p className="font-semibold text-[#f0997b]">Essa sessão ainda não foi atualizada</p>
           <p className="mt-1 mb-4 text-sm text-zinc-200">
-            Ela estava marcada para {data(atendimento.data_sessao)}. O que aconteceu?
+            Ela estava marcada para {data(atendimento.data_sessao)}. Ela aconteceu, foi cancelada ou
+            precisa de uma nova data?
           </p>
           {botoesDeStatus}
         </section>

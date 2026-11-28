@@ -27,11 +27,17 @@ export default async function ClientePage({ params }: Props) {
 
   const { data: atendimentos } = await supabase
     .from('atendimentos')
-    .select('id, descricao, valor_total, valor_restante, data_sessao, status')
+    .select('id, descricao, valor_total, valor_restante, data_sessao, status, reagendamentos')
     .eq('cliente_id', id)
     .order('data_sessao', { ascending: false, nullsFirst: false })
 
   const telefoneLimpo = cliente.telefone?.replace(/\D/g, '')
+
+  // Ajuda o tatuador a perceber quem costuma desmarcar
+  const totalRemarcacoes = (atendimentos ?? []).reduce(
+    (soma, a) => soma + Number(a.reagendamentos ?? 0),
+    0
+  )
 
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6">
@@ -49,7 +55,7 @@ export default async function ClientePage({ params }: Props) {
         />
       </div>
 
-      {(cliente.telefone || cliente.instagram || cliente.observacoes) && (
+      {(cliente.telefone || cliente.instagram || cliente.observacoes || totalRemarcacoes > 0) && (
         <section className="sombra-cartao mb-10 space-y-4 rounded-2xl border border-marca bg-superficie px-6 py-5">
           {cliente.telefone && (
             <p className="text-white">
@@ -76,6 +82,12 @@ export default async function ClientePage({ params }: Props) {
               >
                 @{cliente.instagram}
               </a>
+            </p>
+          )}
+
+          {totalRemarcacoes > 0 && (
+            <p className="text-[#f0997b]">
+              Remarcou {totalRemarcacoes} {totalRemarcacoes === 1 ? 'vez' : 'vezes'}
             </p>
           )}
 
@@ -123,7 +135,14 @@ export default async function ClientePage({ params }: Props) {
                   </div>
 
                   <div className="mt-2 flex items-end justify-between gap-3">
-                    <span className="text-zinc-400">{formataData(a.data_sessao)}</span>
+                    <span className="text-zinc-400">
+                      {formataData(a.data_sessao)}
+                      {Number(a.reagendamentos) > 0 && (
+                        <span className="block text-xs text-[#f0997b]">
+                          remarcada {a.reagendamentos}x
+                        </span>
+                      )}
+                    </span>
                     <span className="text-right text-destaque">
                       {moeda(a.valor_total)}
                       {Number(a.valor_restante) > 0 && (

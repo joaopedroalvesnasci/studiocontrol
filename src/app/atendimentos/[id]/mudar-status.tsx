@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { moeda, FORMAS, FORMAS_ESCOLHA, type FormaPagamento } from '@/lib/formato'
 import Botao from '@/components/ui/botao'
+import PainelReagendar from './painel-reagendar'
 
 type Props = {
   id: string
@@ -13,15 +14,27 @@ type Props = {
   valorAReceber: number
   /** Há sinal combinado que ainda não foi confirmado? */
   sinalPendente: boolean
+  dataSessao: string | null
+  duracaoMinutos: number
+  reagendamentos: number
 }
 
 type Status = 'agendada' | 'concluida' | 'cancelada'
 
-export default function MudarStatus({ id, statusAtual, valorAReceber, sinalPendente }: Props) {
+export default function MudarStatus({
+  id,
+  statusAtual,
+  valorAReceber,
+  sinalPendente,
+  dataSessao,
+  duracaoMinutos,
+  reagendamentos,
+}: Props) {
   const router = useRouter()
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
   const [perguntando, setPerguntando] = useState(false)
+  const [reagendando, setReagendando] = useState(false)
 
   async function salvar(campos: Record<string, string | null>) {
     setSalvando(true)
@@ -64,6 +77,18 @@ export default function MudarStatus({ id, statusAtual, valorAReceber, sinalPende
       // Sem sinal confirmado, o cliente pagou tudo de uma vez: o sinal vai junto
       ...(sinalPendente ? { sinal_recebido_em: agora, sinal_forma: forma } : {}),
     })
+  }
+
+  if (reagendando) {
+    return (
+      <PainelReagendar
+        id={id}
+        dataSessao={dataSessao}
+        duracaoMinutos={duracaoMinutos}
+        reagendamentos={reagendamentos}
+        aoFechar={() => setReagendando(false)}
+      />
+    )
   }
 
   if (perguntando) {
@@ -122,6 +147,14 @@ export default function MudarStatus({ id, statusAtual, valorAReceber, sinalPende
         <>
           <Botao onClick={concluir} disabled={salvando} className="w-full">
             Marcar como concluída
+          </Botao>
+          <Botao
+            variante="secundario"
+            onClick={() => setReagendando(true)}
+            disabled={salvando}
+            className="w-full"
+          >
+            {dataSessao ? 'Reagendar' : 'Marcar data'}
           </Botao>
           <Botao
             variante="secundario"
