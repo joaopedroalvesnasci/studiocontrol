@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { dataHora, STATUS, ETIQUETA, type StatusSessao } from '@/lib/formato'
+import { periodo, STATUS, ETIQUETA, type StatusSessao } from '@/lib/formato'
 import MudarStatus from './mudar-status'
 import BlocoPagamento from './bloco-pagamento'
 
@@ -47,10 +47,10 @@ export default async function AtendimentoPage({ params }: Props) {
           )}
           <span className={`${ETIQUETA} mt-2 ${status.cor}`}>{status.rotulo}</span>
         </div>
-        <p className="mt-1 text-zinc-400">{dataHora(atendimento.data_sessao)}</p>
+        <p className="mt-1 text-zinc-400">{periodo(atendimento.data_sessao, atendimento.duracao_minutos)}</p>
       </header>
 
-            {/* O valor a cobrar é o que o tatuador precisa ver primeiro */}
+      {/* O valor a cobrar é o que o tatuador precisa ver primeiro */}
       <BlocoPagamento
         id={atendimento.id}
         valorTotal={Number(atendimento.valor_total)}

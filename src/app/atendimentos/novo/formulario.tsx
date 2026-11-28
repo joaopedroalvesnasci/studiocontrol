@@ -4,7 +4,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { enviarReferencia, TAMANHO_MAXIMO } from '@/lib/upload'
-import { moeda, FORMAS, FORMAS_ESCOLHA, type FormaPagamento } from '@/lib/formato'
+import { moeda, periodo, FORMAS, FORMAS_ESCOLHA, type FormaPagamento } from '@/lib/formato'
+import {
+  DURACOES,
+  DURACAO_PADRAO,
+  intervalo,
+  conflitos,
+  proximoHorarioLivre,
+  paraCampoDataHora,
+  buscarSessoesProximas,
+  type SessaoOcupada,
+} from '@/lib/agenda'
 import { Campo, CampoTexto } from '@/components/ui/campo'
 import Selecao from '@/components/ui/selecao'
 import Botao from '@/components/ui/botao'
@@ -29,6 +39,8 @@ export default function FormularioAtendimento({
   const [sinalRecebido, setSinalRecebido] = useState(true)
   const [formaSinal, setFormaSinal] = useState<FormaPagamento>('pix')
   const [dataSessao, setDataSessao] = useState('')
+  const [duracao, setDuracao] = useState<number>(DURACAO_PADRAO)
+  const [conflito, setConflito] = useState<{ sessao: SessaoOcupada; sugestao: string | null } | null>(null)
 
   const [modoImagem, setModoImagem] = useState<'arquivo' | 'link'>('arquivo')
   const [arquivo, setArquivo] = useState<File | null>(null)
@@ -81,6 +93,20 @@ export default function FormularioAtendimento({
 
       if (!user) throw new Error('Sua sessão expirou. Entre novamente.')
 
+      // Um tatuador não atende duas pessoas ao mesmo tempo: confere o horário antes de salvar
+      if (dataSessao) {
+        const desejado = new Date(dataSessao)
+        const sessoes = await buscarSessoesProximas(supabase, desejado)
+        const choques = conflitos(intervalo(desejado, duracao), sessoes)
+
+        if (choques.length > 0) {
+          const livre = proximoHorarioLivre(desejado, duracao, sessoes)
+          setConflito({ sessao: choques[0], sugestao: livre ? paraCampoDataHora(livre) : null })
+          setSalvando(false)
+          return
+        }
+      }
+
       let imagemUrl: string | null = null
 
       if (modoImagem === 'arquivo' && arquivo) {
@@ -101,6 +127,7 @@ export default function FormularioAtendimento({
           sinal_recebido_em: registrarSinal ? new Date().toISOString() : null,
           sinal_forma: registrarSinal ? formaSinal : null,
           data_sessao: dataSessao ? new Date(dataSessao).toISOString() : null,
+          duracao_minutos: duracao,
           status: 'agendada',
         })
         .select('id')
@@ -273,10 +300,69 @@ export default function FormularioAtendimento({
         rotulo="Data e hora da sessão"
         type="datetime-local"
         value={dataSessao}
-        onChange={(e) => setDataSessao(e.target.value)}
+        onChange={(e) => {
+          setDataSessao(e.target.value)
+          setConflito(null)
+        }}
         ajuda="Deixe em branco se ainda não tiver data marcada."
         className="[color-scheme:dark]"
       />
+
+      <div>
+        <p className="mb-2 ml-4 text-base text-white">Duração</p>
+        <div className="grid grid-cols-3 gap-2">
+          {DURACOES.map((d) => (
+            <button
+              key={d.minutos}
+              type="button"
+              onClick={() => {
+                setDuracao(d.minutos)
+                setConflito(null)
+              }}
+              className={`rounded-full border px-3 py-2.5 text-sm transition ${
+                duracao === d.minutos
+                  ? 'border-destaque bg-marca/30 text-destaque'
+                  : 'border-marca text-zinc-300 hover:text-white'
+              }`}
+            >
+              {d.rotulo}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {conflito && (
+        <div className="rounded-2xl border border-[#f0997b] bg-[#f0997b]/10 px-5 py-4">
+          <p className="font-semibold text-[#f0997b]">
+            {duracao >= 1440 ? 'Esse dia já tem sessão marcada' : 'Esse horário já está ocupado'}
+          </p>
+          <p className="mt-1 text-sm text-zinc-200">
+            {conflito.sessao.clientes?.nome ?? 'Cliente'}, {conflito.sessao.descricao}
+          </p>
+          <p className="text-sm text-zinc-400">
+            {periodo(conflito.sessao.data_sessao, conflito.sessao.duracao_minutos)}
+          </p>
+
+          {conflito.sugestao ? (
+            <button
+              type="button"
+              onClick={() => {
+                setDataSessao(conflito.sugestao!)
+                setConflito(null)
+              }}
+              className="mt-3 w-full rounded-full bg-marca px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-marca-forte"
+            >
+              Usar o próximo horário livre: {conflito.sugestao.slice(11)}
+            </button>
+          ) : (
+            <p className="mt-3 text-sm text-zinc-300">
+              {duracao >= 1440
+                ? 'Escolha outra data.'
+                : 'Não há outro horário livre nesse dia. Escolha outra data.'}
+            </p>
+          )}
+        </div>
+      )}
 
       {erro && (
         <p className="rounded-2xl border border-red-900 bg-red-950/50 px-5 py-3 text-sm text-red-300">

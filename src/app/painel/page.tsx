@@ -2,14 +2,14 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import CabecalhoPagina from '@/components/cabecalho-pagina'
 import EstadoVazio from '@/components/ui/estado-vazio'
-import { moeda, dataHora, ehHoje } from '@/lib/formato'
+import { moeda, periodo, ehHoje } from '@/lib/formato'
 
 export default async function PainelPage() {
   const supabase = await createClient()
 
   const { data: sessoes } = await supabase
     .from('atendimentos')
-    .select('id, descricao, valor_sinal, valor_restante, sinal_recebido_em, pagamento_recebido_em, data_sessao, clientes(nome)')
+    .select('id, descricao, valor_sinal, valor_restante, sinal_recebido_em, pagamento_recebido_em, data_sessao, duracao_minutos, clientes(nome)')
     .eq('status', 'agendada')
     .not('data_sessao', 'is', null)
     .order('data_sessao', { ascending: true })
@@ -66,7 +66,7 @@ export default async function PainelPage() {
 
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-zinc-400">
-                      {dataHora(sessao.data_sessao)}
+                      {periodo(sessao.data_sessao, sessao.duracao_minutos, true)}
                     </span>
                     <span className="text-xl font-bold text-destaque">
                       {pago ? 'Pago' : moeda(sessao.valor_restante)}
