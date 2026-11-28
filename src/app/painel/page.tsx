@@ -1,18 +1,59 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import CabecalhoPagina from '@/components/cabecalho-pagina'
 import EstadoVazio from '@/components/ui/estado-vazio'
-import { moeda, periodo, ehHoje } from '@/lib/formato'
+import { inicioDeHojeISO } from '@/lib/agenda'
+import CartaoSessao, { type SessaoDaAgenda } from './cartao-sessao'
+
+const CAMPOS =
+  'id, descricao, valor_sinal, valor_restante, sinal_recebido_em, pagamento_recebido_em, data_sessao, duracao_minutos, clientes(nome)'
 
 export default async function PainelPage() {
   const supabase = await createClient()
+  const meiaNoiteDeHoje = inicioDeHojeISO()
 
-  const { data: sessoes } = await supabase
-    .from('atendimentos')
-    .select('id, descricao, valor_sinal, valor_restante, sinal_recebido_em, pagamento_recebido_em, data_sessao, duracao_minutos, clientes(nome)')
-    .eq('status', 'agendada')
-    .not('data_sessao', 'is', null)
-    .order('data_sessao', { ascending: true })
+  const [atrasadas, aReceber, proximas, semData] = await Promise.all([
+    // Agendadas para um dia que já passou
+    supabase
+      .from('atendimentos')
+      .select(CAMPOS)
+      .eq('status', 'agendada')
+      .lt('data_sessao', meiaNoiteDeHoje)
+      .order('data_sessao', { ascending: true }),
+
+    // Concluídas com valor ainda em aberto
+    supabase
+      .from('atendimentos')
+      .select(CAMPOS)
+      .eq('status', 'concluida')
+      .is('pagamento_recebido_em', null)
+      .gt('valor_restante', 0)
+      .order('data_sessao', { ascending: true }),
+
+    // De hoje em diante
+    supabase
+      .from('atendimentos')
+      .select(CAMPOS)
+      .eq('status', 'agendada')
+      .gte('data_sessao', meiaNoiteDeHoje)
+      .order('data_sessao', { ascending: true }),
+
+    // Orçamentos sem data
+    supabase
+      .from('atendimentos')
+      .select(CAMPOS)
+      .eq('status', 'agendada')
+      .is('data_sessao', null)
+      .order('created_at', { ascending: false }),
+  ])
+
+  const lista = (r: { data: unknown }) => (r.data ?? []) as SessaoDaAgenda[]
+  const listaAtrasadas = lista(atrasadas)
+  const listaAReceber = lista(aReceber)
+  const listaProximas = lista(proximas)
+  const listaSemData = lista(semData)
+
+  const totalPendencias = listaAtrasadas.length + listaAReceber.length
+  const tudoVazio = totalPendencias + listaProximas.length + listaSemData.length === 0
 
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6">
@@ -22,61 +63,67 @@ export default async function PainelPage() {
         acao={{ href: '/atendimentos/novo', rotulo: 'Novo' }}
       />
 
-      {!sessoes || sessoes.length === 0 ? (
+      {tudoVazio && (
         <EstadoVazio
           titulo="Nenhuma sessão agendada"
           descricao="Cadastre um cliente e crie o primeiro atendimento para ver a agenda."
           acao={{ href: '/clientes', rotulo: 'Ver clientes' }}
         />
-      ) : (
-        <ul className="space-y-4">
-          {sessoes.map((sessao) => {
-            const cliente = sessao.clientes as unknown as { nome: string } | null
-            const hoje = ehHoje(sessao.data_sessao)
-            const sinalPendente = Number(sessao.valor_sinal) > 0 && !sessao.sinal_recebido_em
-            const pago = Boolean(sessao.pagamento_recebido_em)
+      )}
 
-            return (
-              <li key={sessao.id}>
-                <Link
-                  href={`/atendimentos/${sessao.id}`}
-                  className={`sombra-cartao block rounded-2xl border bg-superficie px-6 py-5 transition hover:border-destaque ${
-                    hoje ? 'border-destaque' : 'border-marca'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="truncate text-2xl text-white">
-                      {cliente?.nome ?? 'Cliente removido'}
-                    </p>
-                    <div className="flex shrink-0 gap-2">
-                      {sinalPendente && (
-                        <span className="rounded-md border border-[#f0997b] px-2.5 py-1 text-xs text-[#f0997b]">
-                          Sinal pendente
-                        </span>
-                      )}
-                      {hoje && (
-                        <span className="rounded-md bg-destaque px-3 py-1 text-xs font-bold text-fundo">
-                          Hoje
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="mt-1 truncate text-zinc-400">{sessao.descricao}</p>
-
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-zinc-400">
-                      {periodo(sessao.data_sessao, sessao.duracao_minutos, true)}
-                    </span>
-                    <span className="text-xl font-bold text-destaque">
-                      {pago ? 'Pago' : moeda(sessao.valor_restante)}
-                    </span>
-                  </div>
-                </Link>
+      {totalPendencias > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-1 flex items-center gap-2 px-2 text-xl text-white">
+            Precisa da sua atenção
+            <span className="rounded-full bg-[#f0997b] px-2.5 py-0.5 text-sm font-bold text-fundo">
+              {totalPendencias}
+            </span>
+          </h2>
+          <p className="mb-4 px-2 text-sm text-zinc-400">
+            Toque na sessão para concluir, cancelar ou registrar o pagamento.
+          </p>
+          <ul className="space-y-4">
+            {listaAtrasadas.map((s) => (
+              <li key={s.id}>
+                <CartaoSessao sessao={s} variante="atrasada" />
               </li>
-            )
-          })}
-        </ul>
+            ))}
+            {listaAReceber.map((s) => (
+              <li key={s.id}>
+                <CartaoSessao sessao={s} variante="receber" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {listaProximas.length > 0 && (
+        <section className="mb-10">
+          {(totalPendencias > 0 || listaSemData.length > 0) && (
+            <h2 className="mb-4 px-2 text-xl text-white">Próximas sessões</h2>
+          )}
+          <ul className="space-y-4">
+            {listaProximas.map((s) => (
+              <li key={s.id}>
+                <CartaoSessao sessao={s} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {listaSemData.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-1 px-2 text-xl text-white">Sem data marcada</h2>
+          <p className="mb-4 px-2 text-sm text-zinc-400">Orçamentos que ainda não viraram sessão.</p>
+          <ul className="space-y-4">
+            {listaSemData.map((s) => (
+              <li key={s.id}>
+                <CartaoSessao sessao={s} variante="semData" />
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </main>
   )
