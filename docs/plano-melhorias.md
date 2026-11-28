@@ -11,7 +11,9 @@ teste guiado, revisão em Pull Request e conferência em produção antes da pr�
 | 3 | Pendências (sessões atrasadas e pagamentos a receber) e "Sem data marcada" | — |
 | 4 | Reagendar, com contagem de remarcações e a mesma checagem de horário | 1 coluna |
 | 5 | Alternância Lista / Calendário na Agenda | — |
-| 6 | Aba Financeiro (faturamento) | — |
+
+A aba Financeiro (faturamento) saiu do escopo e fica como ideia para o futuro,
+junto com despesas, materiais e lucro.
 
 ## Decisões
 

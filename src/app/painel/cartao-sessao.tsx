@@ -18,8 +18,9 @@ type Props = {
   /**
    * normal: próxima sessão · atrasada: dia já passou e segue agendada
    * receber: concluída com pagamento em aberto · semData: orçamento sem data
+   * concluida: já feita e paga (aparece no calendário)
    */
-  variante?: 'normal' | 'atrasada' | 'receber' | 'semData'
+  variante?: 'normal' | 'atrasada' | 'receber' | 'semData' | 'concluida'
 }
 
 const LARANJA = 'border-[#f0997b] text-[#f0997b]'
@@ -29,10 +30,13 @@ export default function CartaoSessao({ sessao, variante = 'normal' }: Props) {
   const sinalPendente = Number(sessao.valor_sinal) > 0 && !sessao.sinal_recebido_em
   const pago = Boolean(sessao.pagamento_recebido_em)
   const pendencia = variante === 'atrasada' || variante === 'receber'
+  const concluida = variante === 'concluida'
 
   const borda = pendencia
     ? 'border-[#f0997b]'
-    : hoje
+    : concluida
+      ? 'border-zinc-600'
+      : hoje
       ? 'border-destaque'
       : 'border-marca'
 
@@ -60,7 +64,12 @@ export default function CartaoSessao({ sessao, variante = 'normal' }: Props) {
           {variante === 'receber' && (
             <span className={`rounded-md border px-2.5 py-1 text-xs ${LARANJA}`}>A receber</span>
           )}
-          {!pendencia && sinalPendente && (
+          {concluida && (
+            <span className="rounded-md border border-zinc-400 px-2.5 py-1 text-xs text-zinc-200">
+              Concluída
+            </span>
+          )}
+          {!pendencia && !concluida && sinalPendente && (
             <span className={`rounded-md border px-2.5 py-1 text-xs ${LARANJA}`}>Sinal pendente</span>
           )}
           {hoje && (

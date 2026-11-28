@@ -3,11 +3,34 @@ import CabecalhoPagina from '@/components/cabecalho-pagina'
 import EstadoVazio from '@/components/ui/estado-vazio'
 import { inicioDeHojeISO } from '@/lib/agenda'
 import CartaoSessao, { type SessaoDaAgenda } from './cartao-sessao'
+import AlternarModo from './alternar-modo'
+import Calendario from './calendario'
 
 const CAMPOS =
   'id, descricao, valor_sinal, valor_restante, sinal_recebido_em, pagamento_recebido_em, data_sessao, duracao_minutos, clientes(nome)'
 
-export default async function PainelPage() {
+type Props = {
+  searchParams: Promise<{ modo?: string; mes?: string; dia?: string }>
+}
+
+export default async function PainelPage({ searchParams }: Props) {
+  const { modo, mes, dia } = await searchParams
+
+  // A Agenda abre na lista; o calendário só aparece quando escolhido
+  if (modo === 'calendario') {
+    return (
+      <main className="mx-auto w-full max-w-md px-6 pt-6">
+        <CabecalhoPagina
+          titulo="Agenda"
+          descricao="Suas sessões mês a mês"
+          acao={{ href: '/atendimentos/novo', rotulo: 'Novo' }}
+        />
+        <AlternarModo modo="calendario" />
+        <Calendario mes={mes} dia={dia} />
+      </main>
+    )
+  }
+
   const supabase = await createClient()
   const meiaNoiteDeHoje = inicioDeHojeISO()
 
@@ -62,6 +85,8 @@ export default async function PainelPage() {
         descricao="Suas próximas sessões, da mais próxima para a mais distante"
         acao={{ href: '/atendimentos/novo', rotulo: 'Novo' }}
       />
+
+      <AlternarModo modo="lista" />
 
       {tudoVazio && (
         <EstadoVazio
