@@ -1,7 +1,32 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { inicioDeHojeISO } from '@/lib/agenda'
+
+/** Quantas sessões estão atrasadas ou com pagamento em aberto (mesma regra da Agenda). */
+async function contarPendencias() {
+  const supabase = createClient()
+  const meiaNoiteDeHoje = inicioDeHojeISO()
+
+  const [atrasadas, aReceber] = await Promise.all([
+    supabase
+      .from('atendimentos')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'agendada')
+      .lt('data_sessao', meiaNoiteDeHoje),
+    supabase
+      .from('atendimentos')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'concluida')
+      .is('pagamento_recebido_em', null)
+      .gt('valor_restante', 0),
+  ])
+
+  return (atrasadas.count ?? 0) + (aReceber.count ?? 0)
+}
 
 const ITENS = [
   {
@@ -37,6 +62,20 @@ const ITENS = [
 
 export default function NavInferior() {
   const caminho = usePathname()
+  const [pendencias, setPendencias] = useState(0)
+
+  // Reconta a cada troca de página, para o número acompanhar o que foi resolvido
+  useEffect(() => {
+    let ativo = true
+    contarPendencias()
+      .then((total) => {
+        if (ativo) setPendencias(total)
+      })
+      .catch(() => {})
+    return () => {
+      ativo = false
+    }
+  }, [caminho])
 
   return (
     <nav
@@ -47,25 +86,37 @@ export default function NavInferior() {
       <ul className="mx-auto flex max-w-md">
         {ITENS.map((item) => {
           const ativo = caminho.startsWith(item.href)
+          const numero = item.href === '/painel' ? pendencias : 0
 
           return (
             <li key={item.href} className="flex-1">
               <Link
                 href={item.href}
                 aria-current={ativo ? 'page' : undefined}
+                aria-label={numero > 0 ? `${item.rotulo}, ${numero} pendências` : undefined}
                 className={`flex flex-col items-center gap-1 py-3 text-xs transition ${
                   ativo ? 'text-destaque' : 'text-apagado hover:text-zinc-300'
                 }`}
               >
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  {item.icone}
-                </svg>
+                <span className="relative">
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    {item.icone}
+                  </svg>
+                  {numero > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -top-1.5 -right-2.5 min-w-5 rounded-full bg-[#f0997b] px-1.5 text-center text-[11px] leading-5 font-bold text-fundo"
+                    >
+                      {numero > 9 ? '9+' : numero}
+                    </span>
+                  )}
+                </span>
                 {item.rotulo}
               </Link>
             </li>

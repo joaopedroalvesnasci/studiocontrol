@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { periodo, STATUS, ETIQUETA, type StatusSessao } from '@/lib/formato'
+import { periodo, data, STATUS, ETIQUETA, type StatusSessao } from '@/lib/formato'
+import { diaJaPassou } from '@/lib/agenda'
 import MudarStatus from './mudar-status'
 import BlocoPagamento from './bloco-pagamento'
 
@@ -27,6 +28,18 @@ export default async function AtendimentoPage({ params }: Props) {
 
   const status = STATUS[atendimento.status as StatusSessao]
 
+  // Agendada para um dia que já passou: o tatuador precisa dizer o que aconteceu
+  const atrasada = atendimento.status === 'agendada' && diaJaPassou(atendimento.data_sessao)
+
+  const botoesDeStatus = (
+    <MudarStatus
+      id={atendimento.id}
+      statusAtual={atendimento.status}
+      valorAReceber={Number(atendimento.valor_restante)}
+      sinalPendente={Number(atendimento.valor_sinal) > 0 && !atendimento.sinal_recebido_em}
+    />
+  )
+
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6">
       <Link href="/painel" className="text-sm text-zinc-400 transition hover:text-white">
@@ -49,6 +62,16 @@ export default async function AtendimentoPage({ params }: Props) {
         </div>
         <p className="mt-1 text-zinc-400">{periodo(atendimento.data_sessao, atendimento.duracao_minutos)}</p>
       </header>
+
+      {atrasada && (
+        <section className="mb-6 rounded-2xl border border-[#f0997b] bg-[#f0997b]/10 px-6 py-5">
+          <p className="font-semibold text-[#f0997b]">Essa sessão ainda não foi atualizada</p>
+          <p className="mt-1 mb-4 text-sm text-zinc-200">
+            Ela estava marcada para {data(atendimento.data_sessao)}. O que aconteceu?
+          </p>
+          {botoesDeStatus}
+        </section>
+      )}
 
       {/* O valor a cobrar é o que o tatuador precisa ver primeiro */}
       <BlocoPagamento
@@ -94,12 +117,7 @@ export default async function AtendimentoPage({ params }: Props) {
       </section>
 
       <div className="mt-8">
-        <MudarStatus
-          id={atendimento.id}
-          statusAtual={atendimento.status}
-          valorAReceber={Number(atendimento.valor_restante)}
-          sinalPendente={Number(atendimento.valor_sinal) > 0 && !atendimento.sinal_recebido_em}
-        />
+        {!atrasada && botoesDeStatus}
       </div>
     </main>
   )

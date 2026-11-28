@@ -117,3 +117,16 @@ export async function buscarSessoesProximas(
 
   return (linhas ?? []) as unknown as SessaoOcupada[]
 }
+
+/** Meia-noite de hoje (horário de Brasília), no formato usado nas consultas ao banco. */
+export function inicioDeHojeISO() {
+  return inicioDoDia(new Date()).toISOString()
+}
+
+/**
+ * A data é de um dia anterior a hoje? Uma sessão só vira pendente a partir
+ * do dia seguinte, porque uma sessão de tatuagem dura horas.
+ */
+export function diaJaPassou(valor: string | null | undefined) {
+  return Boolean(valor) && chaveDoDia(valor!) < chaveDoDia()
+}
