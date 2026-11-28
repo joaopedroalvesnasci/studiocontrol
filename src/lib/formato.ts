@@ -64,7 +64,6 @@ export type StatusSessao = keyof typeof STATUS
 /** Classes base da etiqueta de status. */
 export const ETIQUETA = 'shrink-0 rounded-md border px-3 py-1 text-xs tracking-wide'
 
-
 /** Formas de pagamento aceitas pelo banco (ver supabase/etapa1-pagamentos.sql). */
 export const FORMAS = {
   pix: 'Pix',
@@ -82,4 +81,30 @@ export const FORMAS_ESCOLHA: FormaPagamento[] = ['pix', 'dinheiro', 'debito', 'c
 /** Nome legível de uma forma salva no banco. */
 export function nomeForma(forma: string | null | undefined) {
   return FORMAS[(forma ?? 'nao_informada') as FormaPagamento] ?? 'Não informada'
+}
+
+/**
+ * Data com início e fim da sessão: "28/11/2026 · 18:00 às 21:00".
+ * Sessões de dia inteiro (1440 minutos) mostram "Dia inteiro".
+ * Com `curto`, omite o ano: "28/11 · 18:00 às 21:00" (usado na Agenda).
+ */
+export function periodo(
+  dataSessao: string | null | undefined,
+  duracaoMinutos: number | null | undefined,
+  curto = false
+) {
+  if (!dataSessao) return 'Sem data definida'
+
+  const minutos = Number(duracaoMinutos ?? 180)
+  const dia = curto
+    ? new Date(dataSessao).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', timeZone: FUSO })
+    : data(dataSessao)
+  if (minutos >= 1440) return `${dia} · Dia inteiro`
+
+  const inicio = new Date(dataSessao)
+  const fim = new Date(inicio.getTime() + minutos * 60_000)
+  const hora = (d: Date) =>
+    d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: FUSO })
+
+  return `${dia} · ${hora(inicio)} às ${hora(fim)}`
 }

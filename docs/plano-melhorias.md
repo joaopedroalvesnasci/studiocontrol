@@ -7,11 +7,11 @@ teste guiado, revisão em Pull Request e conferência em produção antes da pr�
 |---|---|---|
 | 0 | Datas e "Hoje" no fuso de São Paulo | — |
 | 1 | Confirmação de sinal e restante, com data e forma de pagamento | 4 colunas |
-| 2 | Pendências (sessões atrasadas e pagamentos a receber) e "Sem data marcada" | — |
-| 3 | Reagendar, com contagem de remarcações | 1 coluna |
-| 4 | Alternância Lista / Calendário na Agenda | — |
-| 5 | Aba Financeiro (faturamento) | — |
-| Futuro | Despesas, materiais, estoque e lucro | — |
+| 2 | Duração da sessão e bloqueio de horário ocupado | 1 coluna |
+| 3 | Pendências (sessões atrasadas e pagamentos a receber) e "Sem data marcada" | — |
+| 4 | Reagendar, com contagem de remarcações e a mesma checagem de horário | 1 coluna |
+| 5 | Alternância Lista / Calendário na Agenda | — |
+| 6 | Aba Financeiro (faturamento) | — |
 
 ## Decisões
 
@@ -40,3 +40,10 @@ identificar clientes que costumam faltar.
 despesas. Cada valor conta no mês em que foi recebido. Aba própria na barra
 inferior, entre Clientes e Perfil. Períodos: este mês, mês passado, 3 meses,
 este ano e intervalo personalizado.
+
+**Duração e horário ocupado.** Cada sessão tem duração de 3 horas (padrão),
+6 horas ou dia inteiro. Um tatuador não atende duas pessoas ao mesmo tempo, então
+o sistema não salva uma sessão que se choque com outra agendada: mostra qual sessão
+ocupa o horário e sugere o próximo horário livre do mesmo dia. Sessões que apenas
+encostam (uma termina quando a outra começa) não são conflito. Canceladas e
+concluídas não ocupam horário. A lógica fica em `src/lib/agenda.ts`.
